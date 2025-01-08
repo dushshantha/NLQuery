@@ -1,16 +1,7 @@
-import React, { useState } from 'react';
-import ConfigForm from './components/ConfigForm';
+import React from 'react';
 import Chat from './components/Chat';
 
 const App = () => {
-  const [isConfigured, setIsConfigured] = useState(false);
-
-  const handleConfigSave = async (config) => {
-    // Here you would typically save the configuration to the backend
-    // For now, we'll just set isConfigured to true
-    setIsConfigured(true);
-  };
-
   return (
     <div className="min-h-screen bg-gray-100">
       <header className="bg-white shadow-sm">
@@ -25,11 +16,7 @@ const App = () => {
       </header>
 
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        {!isConfigured ? (
-          <ConfigForm onSave={handleConfigSave} />
-        ) : (
-          <Chat />
-        )}
+        <Chat />
       </main>
     </div>
   );

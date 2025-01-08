@@ -7,7 +7,7 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - ENVIRONMENT=development
+      - ENVIRONMENT=${ENVIRONMENT}
       - DB_TYPE=${DB_TYPE}
       - DB_HOST=${DB_HOST}
       - DB_PORT=${DB_PORT}
