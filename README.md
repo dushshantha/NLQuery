@@ -1,6 +1,9 @@
 # NLQuery
 
-Turn your SQL database queries into natural conversations. NLQuery is an AI-powered tool that translates natural language into SQL queries, making database interactions more intuitive and accessible.
+NLQuery is an AI-powered tool that translates natural language into SQL queries, making database interactions more intuitive and accessible.
+
+![Simple query](docs/Screenshot1.png)
+![A little complex query](docs/Screenshot2.png)
 
 ## Features
 
@@ -68,13 +71,14 @@ pip install -r requirements.txt
 
 3. Run the development server:
 ```bash
+export $(cat ../.env | xargs)
 uvicorn app.main:app --reload
 ```
 
 ### Frontend
 1. Install dependencies:
 ```bash
-cd frontend
+cd frontend-old
 npm install
 ```
 

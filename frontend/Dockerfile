@@ -1,32 +1,31 @@
-FROM node:18-alpine
+# Build stage
+FROM node:20-slim as builder
 
 WORKDIR /app
 
-# Copy package manager files
-COPY package.json ./
+# Copy package files
+COPY package*.json ./
 
 # Install dependencies
-RUN npm install
+RUN npm ci
 
-# Copy the rest of the application
+# Copy source code
 COPY . .
 
-# Create production build
+# Build the application
 RUN npm run build
 
-# Use a lightweight node server for serving static files
-FROM node:18-alpine
+# Production stage
+FROM nginx:alpine
 
-WORKDIR /app
+# Copy the built assets from builder stage
+COPY --from=builder /app/dist /usr/share/nginx/html
 
-# Install serve globally
-RUN npm install -g serve
+# Copy nginx configuration
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-# Copy built files from previous stage
-COPY --from=0 /app/dist ./dist
+# Expose port 80
+EXPOSE 80
 
-# Expose port 3000
-EXPOSE 3000
-
-# Start the server and specify the public URL
-CMD ["serve", "-s", "dist", "-l", "3000", "--single"]
+# Start nginx
+CMD ["nginx", "-g", "daemon off;"]

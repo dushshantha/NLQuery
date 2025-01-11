@@ -1,10 +1,14 @@
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi import status as http_status
 from ..core.security import get_api_key
 from ..models.schemas import ChatRequest, ChatResponse
 from ..core.config import settings
 from ..core.query_executor import AIQueryExecutor, AIConfig, DatabaseConfig
 from typing import Dict
 import uuid
+from sqlalchemy.exc import SQLAlchemyError
+from ..core.errors import DatabaseError, AIServiceError, QueryError
+import traceback
 
 router = APIRouter()
 
@@ -73,8 +77,52 @@ async def chat(
             error_message = result.get("error", "Unknown error occurred")
             raise HTTPException(status_code=400, detail=error_message)
 
+
+
+    except SQLAlchemyError as e:
+
+        error_message = str(e.__cause__ or e)
+
+        stack_trace = traceback.format_exc()
+
+        raise DatabaseError(
+
+            detail=f"Database error: {error_message}",
+
+            context={
+
+                "error_details": error_message,
+
+                "stack_trace": stack_trace,
+
+                "query_status": "Not generated" if "connection" in error_message.lower() else "Failed during execution"
+
+            }
+
+        )
+
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+
+        error_type = type(e).__name__
+
+        error_message = str(e)
+
+        if "api key" in error_message.lower():
+            raise AIServiceError(
+
+                detail=f"AI service error: {error_message}",
+
+                context={"error_type": error_type}
+
+            )
+
+        raise HTTPException(
+
+            status_code=http_status.HTTP_500_INTERNAL_SERVER_ERROR,
+
+            detail={"message": error_message, "type": error_type}
+
+        )
     finally:
         if 'executor' in locals():
             executor.disconnect()
